@@ -1,8 +1,14 @@
 'use client';
 import { useEffect, useState } from 'react';
 
+type User = {
+  _id: string;
+  fullName: string;
+  role: 'general' | 'registered' | 'admin';
+};
+
 export default function AdminUsersPage() {
-  const [users, setUsers] = useState<any[]>([]);
+  const [users, setUsers] = useState<User[]>([]);
 
   useEffect(() => {
     fetchUsers();
@@ -10,7 +16,7 @@ export default function AdminUsersPage() {
 
   const fetchUsers = async () => {
     const res = await fetch('/api/users');
-    const data = await res.json();
+    const data: User[] = await res.json();
     setUsers(data);
   };
 
@@ -23,7 +29,7 @@ export default function AdminUsersPage() {
     fetchUsers();
   };
 
-  const handleRoleChange = async (id: string, role: string) => {
+  const handleRoleChange = async (id: string, role: User['role']) => {
     await fetch('/api/users', {
       method: 'PUT',
       body: JSON.stringify({ id, role }),
@@ -39,7 +45,10 @@ export default function AdminUsersPage() {
         {users.map((user) => (
           <li key={user._id}>
             {user.fullName} ({user.role})
-            <select value={user.role} onChange={(e) => handleRoleChange(user._id, e.target.value)}>
+            <select
+              value={user.role}
+              onChange={(e) => handleRoleChange(user._id, e.target.value as User['role'])}
+            >
               <option value="general">General</option>
               <option value="registered">Registered</option>
               <option value="admin">Admin</option>

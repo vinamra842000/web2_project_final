@@ -1,12 +1,12 @@
+// lib/mongodb.ts
 import { MongoClient } from 'mongodb';
 
 const uri = process.env.MONGODB_URI!;
-const options = {};
+const options = {}; // empty object since those options are now default
 
-let client;
+let client: MongoClient;
 let clientPromise: Promise<MongoClient>;
 
-// Add this declaration to extend the NodeJS global type
 declare global {
   // eslint-disable-next-line no-var
   var _mongoClientPromise: Promise<MongoClient> | undefined;
