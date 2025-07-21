@@ -31,6 +31,9 @@ export default function AdminDashboardPage() {
   const [showUsers, setShowUsers] = useState<boolean>(false)
   const [showRecipes, setShowRecipes] = useState<boolean>(false)
 
+  const [editingUser, setEditingUser] = useState<User | null>(null)
+  const [editForm, setEditForm] = useState({ fullName: '', email: '', role: 'general' })
+
   useEffect(() => {
     fetch('/api/auth/profile')
       .then(res => res.json())
@@ -113,31 +116,42 @@ export default function AdminDashboardPage() {
                   <td className="py-2 px-4 border-b">{user.email}</td>
                   <td className="py-2 px-4 border-b capitalize">{user.role}</td>
                   <td className="py-2 px-4 border-b">
-                    <button className="text-blue-600 hover:underline mr-4">Edit</button>
+                    <button
+                      className="text-blue-600 hover:underline mr-4"
+                      onClick={() => {
+                        if (!user._id) return
+                        setEditingUser(user)
+                        setEditForm({
+                          fullName: user.fullName,
+                          email: user.email,
+                          role: user.role,
+                        })
+                      }}
+                    >
+                      Edit
+                    </button>
 
                     <button
                       className="text-red-600 hover:underline"
                       onClick={async () => {
-                        if (!user._id) return;
-                        const confirmDelete = window.confirm("Are you sure you want to delete this user?");
-                        if (!confirmDelete) return;
+                        if (!user._id) return
+                        const confirmDelete = window.confirm("Are you sure you want to delete this user?")
+                        if (!confirmDelete) return
 
                         const res = await fetch('/api/users', {
                           method: 'DELETE',
                           headers: { 'Content-Type': 'application/json' },
                           body: JSON.stringify({ id: user._id }),
-                        });
+                        })
 
                         if (res.ok) {
-                          setUsers(users.filter(u => u._id !== user._id));
-                          setUserCount(prev => (prev !== null ? prev - 1 : null));
+                          setUsers(users.filter(u => u._id !== user._id))
+                          setUserCount(prev => (prev !== null ? prev - 1 : null))
                         }
                       }}
                     >
                       Delete
                     </button>
-
-
                   </td>
                 </tr>
               ))}
@@ -171,29 +185,107 @@ export default function AdminDashboardPage() {
                     <button
                       className="text-red-600 hover:underline"
                       onClick={async () => {
-                        if (!recipe._id) return;
-                        const confirmDelete = window.confirm("Are you sure you want to delete this recipe?");
-                        if (!confirmDelete) return;
+                        if (!recipe._id) return
+                        const confirmDelete = window.confirm("Are you sure you want to delete this recipe?")
+                        if (!confirmDelete) return
 
                         const res = await fetch(`/api/recipes/${recipe._id}`, {
                           method: 'DELETE',
-                        });
+                        })
 
                         if (res.ok) {
-                          setRecipes(recipes.filter(r => r._id !== recipe._id));
-                          setRecipeCount(prev => (prev !== null ? prev - 1 : null));
+                          setRecipes(recipes.filter(r => r._id !== recipe._id))
+                          setRecipeCount(prev => (prev !== null ? prev - 1 : null))
                         }
                       }}
                     >
                       Delete
                     </button>
-
-
                   </td>
                 </tr>
               ))}
             </tbody>
           </table>
+        </div>
+      )}
+
+      {/* Edit Modal */}
+      {editingUser && (
+        <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
+          <div className="bg-white p-6 rounded shadow-md w-full max-w-md">
+            <h2 className="text-xl font-semibold mb-4">Edit User</h2>
+            <label className="block mb-2">
+              Full Name:
+              <input
+                type="text"
+                value={editForm.fullName}
+                onChange={e => setEditForm({ ...editForm, fullName: e.target.value })}
+                className="border p-2 w-full"
+              />
+            </label>
+            <label className="block mb-2">
+              Email:
+              <input
+                type="email"
+                value={editForm.email}
+                onChange={e => setEditForm({ ...editForm, email: e.target.value })}
+                className="border p-2 w-full"
+              />
+            </label>
+            <label className="block mb-4">
+              Role:
+              <select
+                value={editForm.role}
+                onChange={e =>
+                  setEditForm({
+                    ...editForm,
+                    role: e.target.value as 'admin' | 'registered' | 'general',
+                  })
+                }
+                className="border p-2 w-full"
+              >
+                <option value="admin">Admin</option>
+                <option value="registered">Registered</option>
+                <option value="general">General</option>
+              </select>
+            </label>
+            <div className="flex justify-end gap-4">
+              <button
+                className="bg-gray-300 text-black px-4 py-2 rounded"
+                onClick={() => setEditingUser(null)}
+              >
+                Cancel
+              </button>
+              <button
+                className="bg-green-600 text-white px-4 py-2 rounded"
+                onClick={async () => {
+                  if (!editingUser?._id) return
+                  const res = await fetch('/api/users', {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                      id: editingUser._id,
+                      ...editForm,
+                    }),
+                  })
+
+                  if (res.ok) {
+                    const updated = users.map(u =>
+                      u._id === editingUser._id
+                        ? { ...u, ...editForm, role: editForm.role as 'admin' | 'registered' | 'general' }
+                        : u
+                    )
+                    setUsers(updated)
+                    setEditingUser(null)
+                  } else {
+                    alert('Failed to update user.')
+                  }
+                }}
+              >
+                Save
+              </button>
+            </div>
+          </div>
         </div>
       )}
     </main>
