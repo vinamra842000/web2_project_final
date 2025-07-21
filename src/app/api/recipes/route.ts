@@ -4,6 +4,16 @@ import path from 'path';
 import clientPromise from '@/app/lib/mongodb';
 import { ObjectId } from 'mongodb';
 
+type RecipeDocument = {
+  title: string;
+  description: string;
+  ingredients: string[];
+  steps: string[];
+  userId: string;
+  category: string;
+  image: string;
+};
+
 export async function POST(req: Request) {
   try {
     const formData = await req.formData();
@@ -11,7 +21,6 @@ export async function POST(req: Request) {
     const description = formData.get('description') as string;
     const ingredientsRaw = formData.get('ingredients') as string;
     const stepsRaw = formData.get('steps') as string;
-    // Expect userId to be sent when creating a recipe
     const userId = formData.get('userId') as string;
     const category = formData.get('category') as string;
     const ingredients = ingredientsRaw.split(',').map((i) => i.trim());
@@ -30,9 +39,7 @@ export async function POST(req: Request) {
       imageUrl = '/uploads/' + filename;
     }
 
-    const client = await clientPromise;
-    const db = client.db();
-    await db.collection('recipes').insertOne({
+    const newRecipe: RecipeDocument = {
       title,
       description,
       ingredients,
@@ -40,7 +47,11 @@ export async function POST(req: Request) {
       userId,
       category,
       image: imageUrl,
-    });
+    };
+
+    const client = await clientPromise;
+    const db = client.db();
+    await db.collection('recipes').insertOne(newRecipe);
 
     return NextResponse.json({ message: 'Recipe created' });
   } catch (error) {
@@ -54,20 +65,15 @@ export async function GET(req: Request) {
     const { searchParams } = new URL(req.url);
     const userId = searchParams.get('userId');
     const category = searchParams.get('category');
-    const q = searchParams.get('q'); 
+    const q = searchParams.get('q');
 
-    // Build query based on available query parameters
-    let query: any = {};
-    if (userId) {
-      query.userId = userId;
-    }
-    if (category) {
-      query.category = category;
-    }
-        if (q) {
+    const query: Record<string, any> = {};
+    if (userId) query.userId = userId;
+    if (category) query.category = category;
+    if (q) {
       query.$or = [
         { title: { $regex: q, $options: 'i' } },
-        { description: { $regex: q, $options: 'i' } }
+        { description: { $regex: q, $options: 'i' } },
       ];
     }
 
@@ -77,30 +83,35 @@ export async function GET(req: Request) {
       { $match: query },
       {
         $addFields: {
-          userIdObj: { $toObjectId: "$userId" }
-        }
+          userIdObj: { $toObjectId: '$userId' },
+        },
       },
       {
         $lookup: {
           from: 'users',
           localField: 'userIdObj',
           foreignField: '_id',
-          as: 'authorInfo'
-        }
+          as: 'authorInfo',
+        },
       },
       {
         $addFields: {
-          author: { $arrayElemAt: ['$authorInfo.fullName', 0] }
-        }
+          author: { $arrayElemAt: ['$authorInfo.fullName', 0] },
+        },
       },
       {
         $project: {
           authorInfo: 0,
-          userIdObj: 0
-        }
-      }
+          userIdObj: 0,
+        },
+      },
     ]).toArray();
-    const recipesWithId = recipes.map((r) => ({ ...r, _id: r._id.toString() }));
+
+    const recipesWithId = recipes.map((r) => ({
+      ...r,
+      _id: r._id.toString(),
+    }));
+
     return NextResponse.json(recipesWithId);
   } catch (error) {
     console.error(error);

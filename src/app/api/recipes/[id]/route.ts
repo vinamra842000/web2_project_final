@@ -4,12 +4,24 @@ import { ObjectId } from 'mongodb';
 import { promises as fs } from 'fs';
 import path from 'path';
 
-export async function PUT(req: Request, context: { params: Promise<{ id: string }> }) {
+type RecipeUpdatePayload = {
+  title?: string;
+  description?: string;
+  ingredients?: string[];
+  steps?: string[];
+  category?: string;
+  image?: string;
+};
+
+export async function PUT(
+  req: Request,
+  context: { params: Promise<{ id: string }> }
+) {
   const { id } = await context.params;
   const contentType = req.headers.get('content-type') || '';
-  let data: any = {};
+  let data: RecipeUpdatePayload = {};
 
-  if (contentType.includes("multipart/form-data")) {
+  if (contentType.includes('multipart/form-data')) {
     const formData = await req.formData();
     const title = formData.get('title') as string;
     const description = formData.get('description') as string;
@@ -18,9 +30,9 @@ export async function PUT(req: Request, context: { params: Promise<{ id: string 
     const category = formData.get('category') as string;
     const ingredients = ingredientsRaw.split(',').map((i) => i.trim());
     const steps = stepsRaw.split(',').map((s) => s.trim());
-    
+
     data = { title, description, ingredients, steps, category };
-    
+
     const imageFile = formData.get('image') as File | null;
     if (imageFile && imageFile.name) {
       const buffer = Buffer.from(await imageFile.arrayBuffer());
@@ -33,22 +45,31 @@ export async function PUT(req: Request, context: { params: Promise<{ id: string 
       data = { ...data, image: imageUrl };
     }
   } else {
-    data = await req.json();
-    delete data._id;
+    const body = await req.json();
+    delete body._id;
+    data = body;
   }
-  
+
   const client = await clientPromise;
   const db = client.db();
-  await db.collection('recipes').updateOne({ _id: new ObjectId(id) }, { $set: data });
+  await db.collection('recipes').updateOne(
+    { _id: new ObjectId(id) },
+    { $set: data }
+  );
   return NextResponse.json({ message: 'Recipe updated' });
 }
 
-export async function GET(req: Request, context: { params: { id: string } }) {
+export async function GET(
+  req: Request,
+  context: { params: { id: string } }
+) {
   const { id } = context.params;
   try {
     const client = await clientPromise;
     const db = client.db();
-    const recipe = await db.collection('recipes').findOne({ _id: new ObjectId(id) });
+    const recipe = await db
+      .collection('recipes')
+      .findOne({ _id: new ObjectId(id) });
     if (!recipe) {
       return NextResponse.json({ error: 'Recipe not found' }, { status: 404 });
     }
@@ -60,7 +81,10 @@ export async function GET(req: Request, context: { params: { id: string } }) {
   }
 }
 
-export async function DELETE(req: Request, context: { params: Promise<{ id: string }> }) {
+export async function DELETE(
+  req: Request,
+  context: { params: Promise<{ id: string }> }
+) {
   const { id } = await context.params;
   const client = await clientPromise;
   const db = client.db();

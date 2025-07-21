@@ -1,8 +1,14 @@
 'use client';
 import { useEffect, useState } from 'react';
 
+interface User {
+  _id: string;
+  fullName: string;
+  role: 'general' | 'registered' | 'admin';
+}
+
 export default function AdminUsersPage() {
-  const [users, setUsers] = useState<any[]>([]);
+  const [users, setUsers] = useState<User[]>([]);
 
   useEffect(() => {
     fetchUsers();

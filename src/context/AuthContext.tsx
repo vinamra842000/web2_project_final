@@ -2,16 +2,29 @@
 import { createContext, useState, useEffect, ReactNode, useContext } from 'react';
 import { useRouter } from 'next/navigation';
 
+interface User {
+  _id: string;
+  fullName: string;
+  email: string;
+  role: 'general' | 'registered' | 'admin';
+}
+
 interface AuthContextType {
-  user: any;
+  user: User | null;
   loading: boolean;
   logout: () => Promise<void>;
 }
-const AuthContext = createContext<AuthContextType>({ user: null, loading: true, logout: async () => {} });
+
+const AuthContext = createContext<AuthContextType>({
+  user: null,
+  loading: true,
+  logout: async () => {},
+});
+
 export const useAuth = () => useContext(AuthContext);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [user, setUser] = useState<any>(null);
+  const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const router = useRouter();
 
@@ -20,7 +33,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       try {
         const res = await fetch('/api/auth/profile');
         if (res.ok) {
-          const { user } = await res.json();
+          const { user }: { user: User } = await res.json();
           setUser(user);
         } else {
           setUser(null);
