@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 import { promises as fs } from 'fs';
 import path from 'path';
 import clientPromise from '@/app/lib/mongodb';
-import { ObjectId } from 'mongodb';
+
 
 type RecipeDocument = {
   title: string;
@@ -67,7 +67,7 @@ export async function GET(req: Request) {
     const category = searchParams.get('category');
     const q = searchParams.get('q');
 
-    const query: Record<string, any> = {};
+    const query: Record<string, string | object> = {};
     if (userId) query.userId = userId;
     if (category) query.category = category;
     if (q) {
