@@ -3,6 +3,7 @@ import clientPromise from '@/app/lib/mongodb';
 import { ObjectId } from 'mongodb';
 import { promises as fs } from 'fs';
 import path from 'path';
+import type { NextRequest } from 'next/server';
 
 type RecipeUpdatePayload = {
   title?: string;
@@ -14,10 +15,10 @@ type RecipeUpdatePayload = {
 };
 
 export async function PUT(
-  req: Request,
-  context: { params: Promise<{ id: string }> }
+  req: NextRequest,
+  { params }: { params: { id: string } }
 ) {
-  const { id } = await context.params;
+  const { id } = params;
   const contentType = req.headers.get('content-type') || '';
   let data: RecipeUpdatePayload = {};
 
@@ -60,10 +61,10 @@ export async function PUT(
 }
 
 export async function GET(
-  req: Request,
-  context: { params: { id: string } }
+  req: NextRequest,
+  { params }: { params: { id: string } }
 ) {
-  const { id } = context.params;
+  const { id } = params;
   try {
     const client = await clientPromise;
     const db = client.db();
@@ -82,10 +83,10 @@ export async function GET(
 }
 
 export async function DELETE(
-  req: Request,
-  context: { params: Promise<{ id: string }> }
+  req: NextRequest,
+  { params }: { params: { id: string } }
 ) {
-  const { id } = await context.params;
+  const { id } = params;
   const client = await clientPromise;
   const db = client.db();
   await db.collection('recipes').deleteOne({ _id: new ObjectId(id) });
