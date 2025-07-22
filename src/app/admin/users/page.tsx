@@ -46,8 +46,7 @@ export default function AdminUsersPage() {
           <li key={user._id}>
             {user.fullName} ({user.role})
             <select value={user.role} onChange={(e) => handleRoleChange(user._id, e.target.value)}>
-              <option value="general">General</option>
-              <option value="registered">Registered</option>
+              <option value="registered">User</option>
               <option value="admin">Admin</option>
             </select>
             <button onClick={() => handleDelete(user._id)}>Delete</button>

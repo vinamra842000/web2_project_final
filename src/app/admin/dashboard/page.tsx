@@ -245,8 +245,7 @@ export default function AdminDashboardPage() {
                 className="border p-2 w-full"
               >
                 <option value="admin">Admin</option>
-                <option value="registered">Registered</option>
-                <option value="general">General</option>
+                <option value="registered">User</option>
               </select>
             </label>
             <div className="flex justify-end gap-4">
