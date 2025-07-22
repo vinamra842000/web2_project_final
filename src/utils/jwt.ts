@@ -14,6 +14,7 @@ export function verifyToken(token: string): object | null {
     }
     return decoded;
   } catch (error) {
+    console.error('JWT verification failed:', error);
     return null;
   }
 }

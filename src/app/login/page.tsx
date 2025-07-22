@@ -28,10 +28,9 @@ export default function LoginPage() {
   return (
     <main
       className="min-h-screen flex items-center justify-center bg-cover bg-center px-4"
-      style={{ backgroundImage: "url('/images/food-background.jpg')" }} // Ensure this image exists in your public folder
+      style={{ backgroundImage: "url('/images/food-background.jpg')" }}
     >
       <div className="max-w-md w-full bg-orange-50 pt-22 pb-10 px-8 rounded-xl shadow-xl min-h-[500px]">
-      {/* <div className="max-w-md w-full bg-orange-50 p-8 rounded-xl shadow-xl h-[500px]"> */}
         <h1 className="text-3xl font-bold text-center mb-6" style={{ color: '#A9746E' }}>
           Recipe Manager
         </h1>
@@ -63,7 +62,7 @@ export default function LoginPage() {
           </button>
         </form>
         <p className="text-sm text-gray-600 text-center mt-4">
-          Don't have an account?{' '}
+          Don&apos;t have an account?{' '}
           <Link href="/register" className="text-blue-600 hover:underline">
             Register here
           </Link>

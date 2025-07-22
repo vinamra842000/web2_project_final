@@ -1,9 +1,7 @@
-export async function registerUser(name: string, email: string, password: string) {
-  // Simulate API call
+export async function registerUser() {
   return { success: true, message: "User registered" };
 }
 
-export async function loginUser(email: string, password: string) {
-  // Simulate login
+export async function loginUser() {
   return { success: true, token: "mock-token" };
 }

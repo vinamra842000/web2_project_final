@@ -5,7 +5,6 @@ import { useAuth } from '@/context/AuthContext';
 import { useEffect, useState } from 'react';
 
 export default function Navbar() {
-  const router = useRouter();
   const pathname = usePathname();
   const { logout } = useAuth();
   const [showNavbar, setShowNavbar] = useState(true);
