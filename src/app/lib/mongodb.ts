@@ -3,8 +3,7 @@ import { MongoClient } from 'mongodb';
 const uri = process.env.MONGODB_URI!;
 const options = {};
 
-let client;
-let clientPromise: Promise<MongoClient>;
+let client: MongoClient;
 
 // Add this declaration to extend the NodeJS global type
 declare global {
@@ -17,6 +16,6 @@ if (!global._mongoClientPromise) {
   global._mongoClientPromise = client.connect();
 }
 
-clientPromise = global._mongoClientPromise!;
+const clientPromise: Promise<MongoClient> = global._mongoClientPromise!;
 
 export default clientPromise;
