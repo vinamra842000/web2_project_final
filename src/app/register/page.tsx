@@ -69,7 +69,7 @@ export default function RegisterPage() {
             onChange={handleChange}
             className="w-full p-3 border border-gray-300 rounded text-black focus:outline-none focus:ring-2 focus:ring-green-400"
           >
-            <option value="registered">Registered</option>
+            <option value="registered">User</option>
             <option value="admin">Admin</option>
           </select>
           <button
